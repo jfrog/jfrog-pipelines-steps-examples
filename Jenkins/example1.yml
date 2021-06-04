@@ -1,0 +1,20 @@
+resources:
+  - name: jenkinsBuildInfo
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: myArtifactory		# Replace with your Artifactory integration name
+      buildName: sample-build				# Replace with your build name
+      buildNumber: 1
+      externalCI: MyJenkins					# Replace with your Jenkins integration name
+
+pipelines:
+  - name: pipelines_trigger
+    steps:
+      - name: start_from_jenkins
+        type: Bash
+        configuration:
+          inputResources:
+            - name: jenkinsBuildInfo
+        execution:
+          onExecute:
+            - echo 'Jenkins job triggered Pipelines' 
