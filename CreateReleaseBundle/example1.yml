@@ -1,0 +1,28 @@
+resources:
+  - name: myBuildInfo1
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: myArt
+      buildName: svc_build
+      buildNumber: 1
+      
+  - name: myReleaseBundle
+    type: ReleaseBundle
+    configuration:
+      sourceDistribution: myDist
+      name: demo_rb
+      version: v1.0.0
+
+pipelines:
+  - name: createReleaseBundlePipeline
+    steps:
+      - name: createReleaseBundleStep
+        type: CreateReleaseBundle
+        configuration:
+          releaseBundleName: myReleaseBundle
+          releaseBundleVersion: "${run_number}"
+          dryRun: false
+          inputResources:
+            - name: myBuildInfo1
+          outputResources:
+            - name: myReleaseBundle
