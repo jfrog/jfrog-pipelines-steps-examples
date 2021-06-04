@@ -1,0 +1,37 @@
+resources:
+  - name: myGitRepo
+    type: GitRepo
+    configuration:
+      gitProvider: myGithub
+      path: RjSH1/jfrog-pipelines-simple-example
+      branches:
+        include: master
+  - name: myBuildInfo
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: myArt
+      buildName: SampleApp
+      buildNumber: 1          
+pipelines:  
+  - name: basic_pipeline_xray
+    configuration:
+      environmentVariables:
+        readOnly:
+          my_env_var: "hello"  
+    steps:
+      - name: step_1
+        type: Bash
+        configuration:
+          inputResources:
+            - name: myGitRepo
+          outputResources:
+            - name: myBuildInfo             
+        execution:
+          onExecute:
+            - echo $my_env_var
+
+      - name: xrayScanStep
+        type: XrayScan
+        configuration:
+          inputResources:
+            - name: myBuildInfo 
