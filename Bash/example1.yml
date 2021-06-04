@@ -1,0 +1,50 @@
+resources:
+  - name: myGitRepo
+    type: GitRepo
+    configuration:
+      gitProvider: myGithub
+      path: RjSH1/pipelines-steps-examples
+      branches:
+        include: master
+  - name: myBuildInfo
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: myArt
+      buildName: SampleApp
+      buildNumber: 1   
+      
+pipelines: 
+  - name: basic_pipeline
+    configuration:
+      environmentVariables:
+        readOnly:
+          my_env_var: "hello" 
+    steps:
+      - name: step_1
+        type: Bash
+        configuration:
+          inputResources:
+            - name: myGitRepo
+          outputResources:
+            - name: myBuildInfo            
+        execution:
+          onExecute:
+            - echo $my_env_var
+            - if [ -z $app_version ]; then add_pipeline_variables app_version=1.0.0; else app_version=$(bump_semver $app_version minor); fi
+            - write_output myBuildInfo "buildNumber=$app_version"
+            - add_run_variables run_var="hello"
+      - name: step_2
+        type: Bash
+        configuration:
+          inputResources:
+            - name: myBuildInfo           
+          runtime:
+            type: image
+            image:
+              auto:
+                language: java
+                versions: ['11']
+        execution:
+          onExecute:
+            - echo $run_var 
+            - echo $res_myBuildInfo_buildNumber
