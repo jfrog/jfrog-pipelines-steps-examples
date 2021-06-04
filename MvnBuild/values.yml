@@ -1,4 +1,4 @@
 gitProvider: myGithub
 artifactory: demoArt
-repoPath: RjSH1/jfrog-pipelines-maven-sample
+repoPath: jfrog/jfrog-pipelines-maven-sample     # replace jfrog with your username or org name
 deployerRepo: maven-local
