@@ -1,0 +1,34 @@
+resources:
+# Application source repository
+  - name: gosvc_app
+    type: GitRepo
+    configuration:
+      gitProvider: MyGithub                         # replace with your GitHub integration name
+      path: RjSH1/pipelines_steps                   # replace with your repository name
+      branches:
+        include: master
+        
+# Docker image in an Artifactory repository
+  - name: base_image
+    type: Image
+    configuration:
+      registry: MyArtifactory               # replace with your Artifactory integration name
+      sourceRepository: docker-local        # replace with your repository name
+      imageName: icarus1a.jfrogdev.org/artifactory/docker-local/
+      imageTag: latest
+      autoPull: true
+
+pipelines:
+  - name: demo_pipeline
+    steps:
+      - name: bld_image
+        type: DockerBuild
+        configuration:
+          dockerFileLocation: .
+          dockerFileName: Dockerfile
+          dockerImageName: icarus1a.jfrogdev.org/artifactory/docker-local/    # replace with your fully qualified Docker registry/image name
+          dockerImageTag: ${run_number}
+          inputResources:
+            - name: gosvc_app          
+          integrations:
+            - name: MyArtifactory
