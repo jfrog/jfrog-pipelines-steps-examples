@@ -3,8 +3,8 @@ resources:
   - name: gosvc_app
     type: GitRepo
     configuration:
-      gitProvider: MyGithub                         # replace with your GitHub integration name
-      path: RjSH1/pipelines_steps                   # replace with your repository name
+      gitProvider: myGithub                         # replace with your GitHub integration name
+      path: jfrog/pipelines_steps                   # replace with your repository name
       branches:
         include: master
         
@@ -12,9 +12,9 @@ resources:
   - name: base_image
     type: Image
     configuration:
-      registry: MyArtifactory               # replace with your Artifactory integration name
+      registry: myArtifactory               # replace with your Artifactory integration name
       sourceRepository: docker-local        # replace with your repository name
-      imageName: icarus1a.jfrogdev.org/artifactory/docker-local/
+      imageName: icarus.jfrogdev.org/artifactory/docker-local/    # replace with your fully qualified Docker registry/image name
       imageTag: latest
       autoPull: true
 
@@ -26,9 +26,9 @@ pipelines:
         configuration:
           dockerFileLocation: .
           dockerFileName: Dockerfile
-          dockerImageName: icarus1a.jfrogdev.org/artifactory/docker-local/    # replace with your fully qualified Docker registry/image name
+          dockerImageName: icarus.jfrogdev.org/artifactory/docker-local/    # replace with your fully qualified Docker registry/image name
           dockerImageTag: ${run_number}
           inputResources:
             - name: gosvc_app          
           integrations:
-            - name: MyArtifactory
+            - name: myArtifactory
