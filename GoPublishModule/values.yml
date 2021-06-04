@@ -1,3 +1,3 @@
-repoPath: RjSH1/jfrog-pipelines-go-Sample
+repoPath: jfrog/jfrog-pipelines-go-Sample     # replace jfrog with your username or org name
 gitProvider: myGithub
 artifactory: myArtifactory
