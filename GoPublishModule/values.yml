@@ -1,0 +1,3 @@
+repoPath: RjSH1/jfrog-pipelines-go-Sample
+gitProvider: myGithub
+artifactory: myArtifactory
