@@ -1,0 +1,3 @@
+repoPath: RjSH1/pipelines-steps-examples
+gitProvider: myGitHubIntegration
+artifactory: myArtifactoryIntegration

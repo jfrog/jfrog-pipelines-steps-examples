@@ -1,0 +1,54 @@
+# This config file is templatized so that it can be easily customized. Values can be provided with a values.yml at the root of this repository
+template: true   # required for local templates
+valuesFilePath: ./values.yml
+
+resources:
+  # Sample Go app in a GitRepo
+  - name: go_repo
+    type: GitRepo
+    configuration:
+      path: {{ .Values.repoPath }}
+      branches:
+        include: main
+      gitProvider: {{ .Values.gitProvider }}
+
+  # Build info for the published Go app
+  - name: go_buildinfo
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: {{ .Values.artifactory }}
+
+
+pipelines:
+  - name: go_build_pipeline_example
+    steps:
+      # Build the Go sample app from the GitRepo. Docs at https://www.jfrog.com/confluence/display/JFROG/GoBuild
+      - name: build_go
+        type: GoBuild
+        configuration:
+          sourceLocation: .
+          resolverRepo: go-virtual
+          noRegistry: true
+          inputResources:
+            - name: go_repo
+          integrations:
+            - name: {{ .Values.artifactory }}
+
+      # Publish the Go sample app binary to Artifactory. Docs at https://www.jfrog.com/confluence/display/JFROG/GoPublishBinary
+      - name: publish_go_binary
+        type: GoPublishBinary
+        configuration:
+          inputSteps:
+            - name: build_go
+          targetRepository: go-local
+          integrations:
+            - name: {{ .Values.artifactory }}
+
+      # Publish the Go sample app build info. Docs at https://www.jfrog.com/confluence/display/JFROG/PublishBuildInfo
+      - name: publish_build
+        type: PublishBuildInfo
+        configuration:
+          inputSteps:
+            - name: publish_go_binary
+          outputResources:
+            - name: go_buildinfo
