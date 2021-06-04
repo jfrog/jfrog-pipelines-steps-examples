@@ -1,0 +1,7 @@
+gitIntegration: github_int
+gitRepositoryPath: jfrog/cicd-deep-dive  # replace jfrog with your username or org name
+artifactoryIntegration: artifactory_int
+imageName: app_docker_image
+artifactoryUrl: icarus.jfrogdev.org   # replace with your server name
+sourceRepository: docker-staging-local  # create local repository in Artifactory
+prodRepository: docker-prod-local # create local repository in Artifactory
