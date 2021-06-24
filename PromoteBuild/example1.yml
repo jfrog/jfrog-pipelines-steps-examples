@@ -1,92 +1,79 @@
-template: true   # required for local templates
-valuesFilePath: ./values.yml
-
 resources:
-  - name: app_repo
+  - name: dbp_repo
     type: GitRepo
     configuration:
-      gitProvider: {{ .Values.gitIntegration }}                      
-      path: {{ .Values.gitRepositoryPath }}    
+      gitProvider: my_github                       # <-- replace with your integration
+      path: jfrog/jfrog-pipelines-steps-examples    # <-- replace with your repository name
       branches:
         include: master
 
-  - name: app_buildinfo
+  - name: dbp_image
+    type: Image
+    configuration:
+      registry: art                                # <-- replace with your artifactory integration
+      sourceRepository: docker_local               # <-- required if registry is Artifactory
+      imageName: kaloula.jfrog-pipelines.com/docker-local/dbp  # < -- replace with your image path and name
+      imageTag: latest
+      autoPull: true
+      
+  - name: dbp_build_info
     type: BuildInfo
     configuration:
-      sourceArtifactory: {{ .Values.artifactoryIntegration }}
+      sourceArtifactory: art
+      buildName: dbp_build
+      buildNumber: 1    
 
-  - name: app_promoted_buildinfo
+  - name: dbp_promoted_build_info
     type: BuildInfo
     configuration:
-      sourceArtifactory: {{ .Values.artifactoryIntegration }}
+      sourceArtifactory: art
+      buildName: dbp_build
+      buildNumber: 1
+      
 
 pipelines:
-  - name: app_dev_pipeline
+  - name: pipeline_dbp
     steps:
-      - name: app_build
+      - name: docker_build
         type: DockerBuild
         configuration:
-          affinityGroup: docker_group
+          affinityGroup: dbp_group
           dockerFileLocation: .
           dockerFileName: Dockerfile
-          dockerImageName: {{ .Values.artifactoryUrl }}/{{ .Values.sourceRepository }}/{{ .Values.imageName }}  
+          dockerImageName: kaloula.jfrog-pipelines.com/docker-local/dbp  # replace with your image path and name
           dockerImageTag: ${run_number}
           inputResources:
-            - name: app_repo
+            - name: dbp_repo
           integrations:
-            - name: {{ .Values.artifactoryIntegration }}         
-            
-      - name: app_push
+            - name: art                            # <-- replace with your artifactory integration
+
+      - name: docker_push
         type: DockerPush
         configuration:
-          affinityGroup: docker_group
-          targetRepository: {{ .Values.sourceRepository }}
+          affinityGroup: dbp_group
+          targetRepository: docker-local
           integrations:
-            - name: {{ .Values.artifactoryIntegration }}                            
+            - name: art                            # <-- replace with your artifactory integration
           inputSteps:
-            - name: app_build
+            - name: docker_build
+          outputResources:
+            - name: dbp_image
 
-      - name: publish_app_build
+      - name: publish_dbp_build
         type: PublishBuildInfo
         configuration:
-          affinityGroup: docker_group
           inputSteps:
-            - name: app_push
+            - name: docker_push
           outputResources:
-            - name: app_buildinfo
-            
-      - name: xrayScanStep
-        type: XrayScan
-        configuration:
-          inputResources:
-            - name: app_buildinfo   
+            - name: dbp_build_info
 
-  - name: app_prod_pipeline
-    steps:
-      - name: app_promote_build
+      - name: promote_dbp_build
         type: PromoteBuild
         configuration:
-          #failOnValidate: true
-          #copy: true
-          targetRepository: {{ .Values.prodRepository }}
-          comment: "promoted via pipeline ${pipeline_name} in run number ${run_number}"
-          inputResources:
-            - name: app_buildinfo
-              trigger: false
-          outputResources:
-            - name: app_promoted_buildinfo
-
-      - name: app_deploy
-        type: Bash
-        configuration:
+          targetRepository: demo-pipelines
           integrations:
-            - name: {{ .Values.artifactoryIntegration }}
+            - name: art
           inputResources:
-            - name: app_promoted_buildinfo
-        execution:
-          onStart:
-            - jfrog rt docker-pull {{ .Values.artifactoryUrl }}/{{ .Values.prodRepository }}/{{ .Values.imageName }}:$res_app_promoted_buildinfo_buildNumber {{ .Values.prodRepository }}
-            #- jfrog rt dl prod-go-local/app
-            #- ls -latr
-          onExecute:
-            - docker run {{ .Values.artifactoryUrl }}/{{ .Values.prodRepository }}/{{ .Values.imageName }}:$res_app_promoted_buildinfo_buildNumber
+            - name: dbp_build_info
+          outputResources:
+            - name: dbp_promoted_build_info
