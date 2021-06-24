@@ -1,34 +1,79 @@
 resources:
-# Application source repository
-  - name: gosvc_app
+  - name: dbp_repo
     type: GitRepo
     configuration:
-      gitProvider: myGithub                         # replace with your GitHub integration name
-      path: jfrog/pipelines_steps                   # replace with your repository name
+      gitProvider: myGithub                       # <-- replace with your integration
+      path: jfrog/jfrog-pipelines-steps-examples    # <-- replace with your repository name
       branches:
         include: master
-        
-# Docker image in an Artifactory repository
-  - name: base_image
+
+  - name: dbp_image
     type: Image
     configuration:
-      registry: myArtifactory               # replace with your Artifactory integration name
-      sourceRepository: docker-local        # replace with your repository name
-      imageName: icarus.jfrogdev.org/artifactory/docker-local/    # replace with your fully qualified Docker registry/image name
+      registry: myArtifactory                      # <-- replace with your artifactory integration
+      sourceRepository: docker_local               # <-- required if registry is Artifactory
+      imageName: kaloula.jfrog-pipelines.com/docker-local/dbp  # < -- replace with your image path and name
       imageTag: latest
       autoPull: true
+      
+  - name: dbp_build_info
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: myArtifactory
+      buildName: dbp_build
+      buildNumber: 1    
+
+  - name: dbp_promoted_build_info
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: myArtifactory
+      buildName: dbp_build
+      buildNumber: 1
+      
 
 pipelines:
-  - name: demo_pipeline
+  - name: pipeline_dbp
     steps:
-      - name: bld_image
+      - name: docker_build
         type: DockerBuild
         configuration:
+          affinityGroup: dbp_group
           dockerFileLocation: .
           dockerFileName: Dockerfile
-          dockerImageName: icarus.jfrogdev.org/artifactory/docker-local/    # replace with your fully qualified Docker registry/image name
+          dockerImageName: kaloula.jfrog-pipelines.com/docker-local/dbp  # replace with your image path and name
           dockerImageTag: ${run_number}
           inputResources:
-            - name: gosvc_app          
+            - name: dbp_repo
+          integrations:
+            - name: myArtifactory                            # <-- replace with your artifactory integration
+
+      - name: docker_push
+        type: DockerPush
+        configuration:
+          affinityGroup: dbp_group
+          targetRepository: docker-local
+          integrations:
+            - name: myArtifactory                            # <-- replace with your artifactory integration
+          inputSteps:
+            - name: docker_build
+          outputResources:
+            - name: dbp_image
+
+      - name: publish_dbp_build
+        type: PublishBuildInfo
+        configuration:
+          inputSteps:
+            - name: docker_push
+          outputResources:
+            - name: dbp_build_info
+
+      - name: promote_dbp_build
+        type: PromoteBuild
+        configuration:
+          targetRepository: demo-pipelines
           integrations:
             - name: myArtifactory
+          inputResources:
+            - name: dbp_build_info
+          outputResources:
+            - name: dbp_promoted_build_info
