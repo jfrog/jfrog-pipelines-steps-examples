@@ -2,6 +2,6 @@ gitIntegration: myGithub
 gitRepositoryPath: jfrog/jfrog-pipelines-steps-examples  # replace jfrog with your username or org name
 artifactoryIntegration: myArtifactory
 imageName: app_docker_image
-artifactoryUrl: https://pipe-master.jfrog-pipelines.com   # replace with your server name
+artifactoryUrl: pipe.jfrog-pipelines.com   # replace with your server name
 sourceRepository: docker-staging-local  # create local docker repository in Artifactory
 # prodRepository: su204-docker-prod-local # create local docker repository in Artifactory
