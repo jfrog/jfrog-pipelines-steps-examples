@@ -1,0 +1,92 @@
+template: true   # required for local templates
+valuesFilePath: ./values.yml
+
+resources:
+  - name: app_repo
+    type: GitRepo
+    configuration:
+      gitProvider: {{ .Values.gitIntegration }}                      
+      path: {{ .Values.gitRepositoryPath }}    
+      branches:
+        include: master
+
+  - name: app_buildinfo
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: {{ .Values.artifactoryIntegration }}
+
+  - name: app_promoted_buildinfo
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: {{ .Values.artifactoryIntegration }}
+
+pipelines:
+  - name: app_dev_pipeline_su204
+    steps:
+      - name: app_build
+        type: DockerBuild
+        configuration:
+          affinityGroup: docker_group
+          dockerFileLocation: .
+          dockerFileName: Dockerfile
+          dockerImageName: {{ .Values.artifactoryUrl }}/{{ .Values.sourceRepository }}/{{ .Values.imageName }}  
+          dockerImageTag: ${run_number}
+          inputResources:
+            - name: app_repo
+          integrations:
+            - name: {{ .Values.artifactoryIntegration }}         
+            
+      - name: app_push
+        type: DockerPush
+        configuration:
+          affinityGroup: docker_group
+          targetRepository: {{ .Values.sourceRepository }}
+          integrations:
+            - name: {{ .Values.artifactoryIntegration }}                            
+          inputSteps:
+            - name: app_build
+
+      - name: publish_app_build
+        type: PublishBuildInfo
+        configuration:
+          affinityGroup: docker_group
+          inputSteps:
+            - name: app_push
+          outputResources:
+            - name: app_buildinfo
+            
+      - name: xrayScanStep
+        type: XrayScan
+        configuration:
+          inputResources:
+            - name: app_buildinfo   
+
+  - name: app_prod_pipeline_su204
+    steps:
+      - name: app_promote_build
+        type: PromoteBuild
+        configuration:
+          #failOnValidate: true
+          #copy: true
+          targetRepository: {{ .Values.prodRepository }}
+          comment: "promoted via pipeline ${pipeline_name} in run number ${run_number}"
+          inputResources:
+            - name: app_buildinfo
+              trigger: false
+          outputResources:
+            - name: app_promoted_buildinfo
+
+      - name: app_deploy
+        type: Bash
+        configuration:
+          integrations:
+            - name: {{ .Values.artifactoryIntegration }}
+          inputResources:
+            - name: app_promoted_buildinfo
+        execution:
+          onStart:
+            - jfrog rt docker-pull {{ .Values.artifactoryUrl }}/{{ .Values.prodRepository }}/{{ .Values.imageName }}:$res_app_promoted_buildinfo_buildNumber {{ .Values.prodRepository }}
+            #- jfrog rt dl prod-go-local/app
+            #- ls -latr
+          onExecute:
+            - docker run {{ .Values.artifactoryUrl }}/{{ .Values.prodRepository }}/{{ .Values.imageName }}:$res_app_promoted_buildinfo_buildNumber

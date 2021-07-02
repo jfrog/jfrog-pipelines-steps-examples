@@ -1,0 +1,7 @@
+gitIntegration: github_int
+gitRepositoryPath: RjSH1/Swampup2021-su204-cicd-deep-dive  # replace jfrog with your username or org name
+artifactoryIntegration: artifactory_int
+imageName: app_docker_image
+artifactoryUrl: icarus1d.jfrogdev.org   # replace swampup with your server name
+sourceRepository: su204-docker-staging-local  # create local repository in Artifactory
+prodRepository: su204-docker-prod-local # create local repository in Artifactory
