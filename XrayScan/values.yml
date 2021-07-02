@@ -4,4 +4,4 @@ artifactoryIntegration: myArtifactory
 imageName: app_docker_image
 artifactoryUrl: https://pipe-master.jfrog-pipelines.com   # replace swampup with your server name
 sourceRepository: su204-docker-staging-local  # create local docker repository in Artifactory
-prodRepository: su204-docker-prod-local # create local docker repository in Artifactory
+# prodRepository: su204-docker-prod-local # create local docker repository in Artifactory
