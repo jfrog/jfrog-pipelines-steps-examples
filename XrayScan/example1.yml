@@ -15,11 +15,6 @@ resources:
     configuration:
       sourceArtifactory: {{ .Values.artifactoryIntegration }}
 
-  - name: app_promoted_buildinfo
-    type: BuildInfo
-    configuration:
-      sourceArtifactory: {{ .Values.artifactoryIntegration }}
-
 pipelines:
   - name: app_dev_pipeline
     steps:
