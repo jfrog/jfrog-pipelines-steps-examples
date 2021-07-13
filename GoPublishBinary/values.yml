@@ -1,3 +1,0 @@
-repoPath: jfrog/pipelines-steps-examples     # replace jfrog with your username or org name
-gitProvider: myGitHubIntegration
-artifactory: myArtifactoryIntegration
