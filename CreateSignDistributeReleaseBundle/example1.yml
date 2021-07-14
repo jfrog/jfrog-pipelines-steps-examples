@@ -54,8 +54,8 @@ pipelines:
         configuration:
           releaseBundleName: demo_rb
           releaseBundleVersion: v1.0.${run_number}
-          dryRun: false
-          sign: false
+          dryRun: false                             # when 'true' parse and validate only to test whether a release bundle version can be created
+          sign: false                               # specifies whether the release bundle version will be signed as part of this step
           description: "some random test description"
           inputResources:
             - name: gosvc_promoted_build_info
