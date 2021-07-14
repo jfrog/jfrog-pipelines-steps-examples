@@ -40,7 +40,7 @@ pipelines:
       - name: docker_build
         type: DockerBuild
         configuration:
-          affinityGroup: dbp_group
+          affinityGroup: dbp_group          # affinity group string that is the same as specified in the DockerPush step
           dockerFileLocation: .
           dockerFileName: Dockerfile
           dockerImageName:  {{ .Values.artifactoryUrl }}/{{ .Values.sourceRepository }}/{{ .Values.imageName }}
@@ -53,7 +53,7 @@ pipelines:
       - name: docker_push
         type: DockerPush
         configuration:
-          affinityGroup: dbp_group
+          affinityGroup: dbp_group          # affinity group string that is the same as specified in the DockerBuild step
           targetRepository: docker-local
           integrations:
             - name: {{ .Values.artifactoryIntegration }}
