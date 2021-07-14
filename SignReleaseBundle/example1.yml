@@ -3,7 +3,7 @@ resources:
   - name: gosvc_promoted_build_info
     type: BuildInfo
     configuration:
-      sourceArtifactory: myArt
+      sourceArtifactory: myArt      # <-- replace with your Artifactory integration name
       buildName: app_dev_pipeline_su204
       buildNumber: 1
 
@@ -11,7 +11,7 @@ resources:
   - name: release_bundle
     type: ReleaseBundle
     configuration:
-      sourceDistribution: myDist
+      sourceDistribution: myDist    # <-- replace with your Distribution integration name
       name: demo_rb
       version: v1.0.0
 
@@ -19,7 +19,7 @@ resources:
   - name: signed_bundle
     type: ReleaseBundle
     configuration:
-      sourceDistribution: myDist
+      sourceDistribution: myDist    # <-- replace with your Distribution integration name
       name: demo_rb
       version: v1.0.0
 
