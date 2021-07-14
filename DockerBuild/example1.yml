@@ -75,7 +75,7 @@ pipelines:
         configuration:
           targetRepository: demo-pipelines
           integrations:
-            - name: myArtifactory
+            - name: {{ .Values.artifactoryIntegration }}
           inputResources:
             - name: dbp_build_info
           outputResources:
