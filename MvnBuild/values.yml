@@ -1,4 +1,4 @@
-gitProvider: myGithub
-artifactory: demoArt
+gitProvider: myGithub       # replace with your GitRepo integration name
+artifactory: demoArt        # replace with your Artifactory integration name
 repoPath: jfrog/jfrog-pipelines-maven-sample     # replace jfrog with your username or org name
-deployerRepo: maven-local
+deployerRepo: maven-local     # replace with your Maven local directory created in Artifactory
