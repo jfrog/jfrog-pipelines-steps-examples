@@ -3,7 +3,7 @@ resources:
     type: GitRepo
     configuration:
       gitProvider: myGithub                       # <-- replace with your integration
-      path: jfrog/jfrog-pipelines-steps-examples    # <-- replace with your repository name
+      path: jfrog/jfrog-pipelines-steps-examples    # <-- replace with your full repository name
       branches:
         include: master
 
@@ -19,14 +19,14 @@ resources:
   - name: dbp_build_info
     type: BuildInfo
     configuration:
-      sourceArtifactory: myArtifactory
+      sourceArtifactory: myArtifactory             # <-- replace with your artifactory integration
       buildName: dbp_build
       buildNumber: 1    
 
   - name: dbp_promoted_build_info
     type: BuildInfo
     configuration:
-      sourceArtifactory: myArtifactory
+      sourceArtifactory: myArtifactory             # <-- replace with your artifactory integration
       buildName: dbp_build
       buildNumber: 1
       
