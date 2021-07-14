@@ -2,7 +2,7 @@ resources:
   - name: dbp_repo
     type: GitRepo
     configuration:
-      gitProvider: myGithub                       # <-- replace with your integration
+      gitProvider: myGithub                       # <-- replace with your GitRepo integration name
       path: jfrog/jfrog-pipelines-steps-examples    # <-- replace with your full repository name
       branches:
         include: master
@@ -10,7 +10,7 @@ resources:
   - name: dbp_image
     type: Image
     configuration:
-      registry: myArtifactory                      # <-- replace with your artifactory integration
+      registry: myArtifactory                      # <-- replace with your Artifactory integration name
       sourceRepository: docker_local               # <-- required if registry is Artifactory
       imageName: kaloula.jfrog-pipelines.com/docker-local/dbp  # < -- replace with your image path and name
       imageTag: latest
@@ -19,14 +19,14 @@ resources:
   - name: dbp_build_info
     type: BuildInfo
     configuration:
-      sourceArtifactory: myArtifactory             # <-- replace with your artifactory integration
+      sourceArtifactory: myArtifactory             # <-- replace with your Artifactory integration name
       buildName: dbp_build
       buildNumber: 1    
 
   - name: dbp_promoted_build_info
     type: BuildInfo
     configuration:
-      sourceArtifactory: myArtifactory             # <-- replace with your artifactory integration
+      sourceArtifactory: myArtifactory             # <-- replace with your Artifactory integration name
       buildName: dbp_build
       buildNumber: 1
       
@@ -45,7 +45,7 @@ pipelines:
           inputResources:
             - name: dbp_repo
           integrations:
-            - name: myArtifactory                            # <-- replace with your artifactory integration
+            - name: myArtifactory                            # <-- replace with your Artifactory integration name
 
       - name: docker_push
         type: DockerPush
@@ -53,7 +53,7 @@ pipelines:
           affinityGroup: dbp_group
           targetRepository: docker-local
           integrations:
-            - name: myArtifactory                            # <-- replace with your artifactory integration
+            - name: myArtifactory                            # <-- replace with your Artifactory integration name
           inputSteps:
             - name: docker_build
           outputResources:
