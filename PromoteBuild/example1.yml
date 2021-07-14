@@ -1,32 +1,35 @@
+template: true   # required for local templates
+valuesFilePath: ./values.yml
+
 resources:
   - name: dbp_repo
     type: GitRepo
     configuration:
-      gitProvider: my_github                       # <-- replace with your integration
-      path: jfrog/jfrog-pipelines-steps-examples    # <-- replace with your repository name
+      gitProvider: {{ .Values.gitIntegration }}                      
+      path: {{ .Values.gitRepositoryPath }} 
       branches:
         include: master
 
   - name: dbp_image
     type: Image
     configuration:
-      registry: art                                # <-- replace with your artifactory integration
-      sourceRepository: docker_local               # <-- required if registry is Artifactory
-      imageName: kaloula.jfrog-pipelines.com/docker-local/dbp  # < -- replace with your image path and name
+      registry: {{ .Values.artifactoryIntegration }}
+      sourceRepository:  {{ .Values.sourceRespository }}
+      imageName:  {{ .Values.artifactoryUrl }}/{{ .Values.sourceRepository }}/{{ .Values.imageName }}
       imageTag: latest
       autoPull: true
       
   - name: dbp_build_info
     type: BuildInfo
     configuration:
-      sourceArtifactory: art
+      sourceArtifactory: {{ .Values.artifactoryIntegration }}
       buildName: dbp_build
       buildNumber: 1    
 
   - name: dbp_promoted_build_info
     type: BuildInfo
     configuration:
-      sourceArtifactory: art
+      sourceArtifactory: {{ .Values.artifactoryIntegration }}
       buildName: dbp_build
       buildNumber: 1
       
@@ -40,12 +43,12 @@ pipelines:
           affinityGroup: dbp_group
           dockerFileLocation: .
           dockerFileName: Dockerfile
-          dockerImageName: kaloula.jfrog-pipelines.com/docker-local/dbp  # replace with your image path and name
+          dockerImageName:  {{ .Values.artifactoryUrl }}/{{ .Values.sourceRepository }}/{{ .Values.imageName }}
           dockerImageTag: ${run_number}
           inputResources:
             - name: dbp_repo
           integrations:
-            - name: art                            # <-- replace with your artifactory integration
+            - name: {{ .Values.artifactoryIntegration }}
 
       - name: docker_push
         type: DockerPush
@@ -53,7 +56,7 @@ pipelines:
           affinityGroup: dbp_group
           targetRepository: docker-local
           integrations:
-            - name: art                            # <-- replace with your artifactory integration
+            - name: {{ .Values.artifactoryIntegration }}
           inputSteps:
             - name: docker_build
           outputResources:
@@ -72,7 +75,7 @@ pipelines:
         configuration:
           targetRepository: demo-pipelines
           integrations:
-            - name: art
+            - name: {{ .Values.artifactoryIntegration }}
           inputResources:
             - name: dbp_build_info
           outputResources:
