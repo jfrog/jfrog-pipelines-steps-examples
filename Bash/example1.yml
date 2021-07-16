@@ -1,50 +1,52 @@
-resources:
-  - name: myGitRepo
-    type: GitRepo
-    configuration:
-      gitProvider: myGithub
-      path: jfrog/pipelines-steps-examples.   # replace jfrog with your username or org name
-      branches:
-        include: master
-  - name: myBuildInfo
-    type: BuildInfo
-    configuration:
-      sourceArtifactory: myArt
-      buildName: SampleApp
-      buildNumber: 1   
-      
-pipelines: 
-  - name: basic_pipeline
-    configuration:
-      environmentVariables:
-        readOnly:
-          my_env_var: "hello" 
+pipelines:
+  - name: api_steps
     steps:
-      - name: step_1
+      - name: api_steps
         type: Bash
         configuration:
-          inputResources:
-            - name: myGitRepo
-          outputResources:
-            - name: myBuildInfo            
-        execution:
-          onExecute:
-            - echo $my_env_var
-            - if [ -z $app_version ]; then add_pipeline_variables app_version=1.0.0; else app_version=$(bump_semver $app_version minor); fi
-            - write_output myBuildInfo "buildNumber=$app_version"
-            - add_run_variables run_var="hello"
-      - name: step_2
-        type: Bash
-        configuration:
-          inputResources:
-            - name: myBuildInfo           
           runtime:
-            type: image
-            image:
-              auto:
-                language: java
-                versions: ['11']
+            type: host
+          environmentVariables:
+            env1: value1
+            env2: value2
         execution:
           onExecute:
-            - echo $run_var 
-            - echo $res_myBuildInfo_buildNumber
+            - touch cachefile.txt
+            - add_cache_files cachefile.txt my_file
+
+      - name: api_steps_2
+        type: Bash
+        configuration:
+          runtime:
+            type: host
+          inputSteps:
+            - name: api_steps
+        execution:
+          onExecute:
+            - echo "step 2.."
+
+  - name: api_steps_ProjectAdmin
+    steps:
+      - name: api_steps_ProjectAdmin
+        type: Bash
+        configuration:
+          runtime:
+            type: host
+          environmentVariables:
+            env1: value1
+            env2: value2
+        execution:
+          onExecute:
+            - touch cachefile.txt
+            - add_cache_files cachefile.txt my_file
+
+      - name: api_steps_ProjectAdmin_2
+        type: Bash
+        configuration:
+          runtime:
+            type: host
+          inputSteps:
+            - name: api_steps_ProjectAdmin
+        execution:
+          onExecute:
+            - echo "step 2.."
