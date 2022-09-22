@@ -1,0 +1,52 @@
+pipelines:
+  - name: api_steps
+    steps:
+      - name: api_steps
+        type: Bash
+        configuration:
+          runtime:
+            type: host
+          environmentVariables:
+            env1: value1
+            env2: value2
+        execution:
+          onExecute:
+            - touch cachefile.txt
+            - add_cache_files cachefile.txt my_file
+
+      - name: api_steps_2
+        type: Bash
+        configuration:
+          runtime:
+            type: host
+          inputSteps:
+            - name: api_steps
+        execution:
+          onExecute:
+            - echo "step 2.."
+
+  - name: api_steps_ProjectAdmin
+    steps:
+      - name: api_steps_ProjectAdmin
+        type: Bash
+        configuration:
+          runtime:
+            type: host
+          environmentVariables:
+            env1: value1
+            env2: value2
+        execution:
+          onExecute:
+            - touch cachefile.txt
+            - add_cache_files cachefile.txt my_file
+
+      - name: api_steps_ProjectAdmin_2
+        type: Bash
+        configuration:
+          runtime:
+            type: host
+          inputSteps:
+            - name: api_steps_ProjectAdmin
+        execution:
+          onExecute:
+            - echo "step 2.."

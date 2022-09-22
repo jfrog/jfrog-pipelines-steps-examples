@@ -1,0 +1,3 @@
+myRepo:
+  gitProvider: myGithub         # replace with your GitRepo integration name
+  path: jfrog/jfrog-pipelines-npm-sample     # replace jfrog with your username or org name

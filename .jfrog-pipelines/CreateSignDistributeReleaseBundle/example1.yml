@@ -1,0 +1,88 @@
+template: true   # required for local templates
+valuesFilePath: ./values.yml
+
+resources:
+  # Build info of first build to bundle
+  - name: gosvc_promoted_build_info
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: {{ .Values.myArtifactoryIntegration }}
+      buildName: svc_build
+      buildNumber: 1
+
+  # Build info of second build to bundle
+  - name: appl_promoted_build_info
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: {{ .Values.demoArtifactoryIntegration }}
+      buildName: backend_build
+      buildNumber: 1
+
+  # Release bundle
+  - name: release_bundle
+    type: ReleaseBundle
+    configuration:
+      sourceDistribution: {{ .Values.distributionIntegration }}
+      name: demo_rb
+      version: v1.0.0
+
+  # Signed version of the same release bundle
+  - name: signed_bundle
+    type: ReleaseBundle
+    configuration:
+      sourceDistribution: {{ .Values.distributionIntegration }}
+      name: demo_rb
+      version: v1.0.0
+
+  # Distribution rules
+  - name: distribution_rules
+    type: DistributionRule
+    configuration:
+      sourceDistribution: {{ .Values.distributionIntegration }}
+      serviceName: "*"
+      siteName: "*"
+      cityName: "*"
+      countryCodes:
+        - "CN"
+        - "GB"
+
+pipelines:
+  - name: demo_release_mgmt
+    steps:
+      - name: bundle
+        type: CreateReleaseBundle
+        configuration:
+          releaseBundleName: demo_rb
+          releaseBundleVersion: v1.0.${run_number}
+          dryRun: false                             # when 'true' parse and validate only to test whether a release bundle version can be created
+          sign: false                               # specifies whether the release bundle version will be signed as part of this step
+          description: "some random test description"
+          inputResources:
+            - name: gosvc_promoted_build_info
+              trigger: true
+            - name: appl_promoted_build_info
+              trigger: true
+          outputResources:
+            - name: release_bundle
+          releaseNotes:
+            syntax: markdown
+            content: |
+              ## Heading
+                * Bullet
+                * Points
+            
+      - name: sign
+        type: SignReleaseBundle
+        configuration:
+          inputResources:
+            - name: release_bundle
+          outputResources:
+            - name: signed_bundle
+
+      - name: distribute
+        type: DistributeReleaseBundle
+        configuration:
+          dryRun: false
+          inputResources:
+            - name: signed_bundle
+            - name: distribution_rules
