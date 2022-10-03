@@ -1,0 +1,48 @@
+pipelines: 
+  - name: bash_chronological
+    steps: 
+      - name: Start
+        type: Bash
+        execution: 
+          onExecute: 
+            - echo "It's a start."
+      - name: Step1
+        type: Bash
+        configuration:
+          chronological: true
+          inputSteps: 
+            - name: Start
+        execution: 
+          onExecute: 
+            - add_run_variables step1=foo
+      - name: Step2
+        type: Bash
+        configuration: 
+          chronological: true
+          inputSteps: 
+            - name: Start
+        execution: 
+          onExecute: 
+            - add_run_variables step2=bar
+      - name: Step3
+        type: Bash
+        configuration: 
+          chronological: true
+          inputSteps: 
+            - name: Start
+        execution: 
+          onExecute: 
+            - add_run_variables step3=baz
+      - name: Finish
+        type: Bash
+        configuration: 
+          inputSteps: 
+            - name: Step1
+            - name: Step2
+            - name: Step3
+        execution: 
+          onExecute: 
+            - |
+              echo "Step1: $step1"
+              echo "Step2: $step2"
+              echo "Step3: $step3"
