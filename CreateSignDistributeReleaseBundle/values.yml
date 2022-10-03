@@ -1,3 +1,0 @@
-myArtifactoryIntegration: myArt       # <-- replace with your Artifactory integration name
-demoArtifactoryIntegration: demoArt   # <-- replace with your Artifactory integration name
-distributionIntegration: myDist       # <-- replace with your Distribution integration name
