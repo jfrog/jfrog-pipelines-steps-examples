@@ -1,0 +1,57 @@
+template: true   # required for local templates
+valuesFilePath: ./values.yml
+
+resources:
+  - name: app_repo
+    type: GitRepo
+    configuration:
+      gitProvider: {{ .Values.gitIntegration }}                      
+      path: {{ .Values.gitRepositoryPath }}    
+      branches:
+        include: master
+
+  - name: app_buildinfo
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: {{ .Values.artifactoryIntegration }}
+
+pipelines:
+  - name: app_dev_pipeline
+    steps:
+      - name: app_build
+        type: DockerBuild
+        configuration:
+          affinityGroup: docker_group
+          dockerFileLocation: .
+          dockerFileName: Dockerfile
+          dockerImageName: {{ .Values.artifactoryUrl }}/{{ .Values.sourceRepository }}/{{ .Values.imageName }}  
+          dockerImageTag: ${run_number}
+          inputResources:
+            - name: app_repo
+          integrations:
+            - name: {{ .Values.artifactoryIntegration }}         
+            
+      - name: app_push
+        type: DockerPush
+        configuration:
+          affinityGroup: docker_group
+          targetRepository: {{ .Values.sourceRepository }}
+          integrations:
+            - name: {{ .Values.artifactoryIntegration }}                            
+          inputSteps:
+            - name: app_build
+
+      - name: publish_app_build
+        type: PublishBuildInfo
+        configuration:
+          affinityGroup: docker_group
+          inputSteps:
+            - name: app_push
+          outputResources:
+            - name: app_buildinfo
+            
+      - name: xrayScanStep
+        type: XrayScan
+        configuration:
+          inputResources:
+            - name: app_buildinfo 
