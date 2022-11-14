@@ -14,7 +14,7 @@ resources:
     type: Image
     configuration:
       registry: {{ .Values.artifactoryIntegration }}
-      sourceRepository:  {{ .Values.sourceRespository }}
+      sourceRepository:  {{ .Values.sourceRepository }}
       imageName:  {{ .Values.artifactoryUrl }}/{{ .Values.sourceRepository }}/{{ .Values.imageName }}
       imageTag: latest
       autoPull: true
